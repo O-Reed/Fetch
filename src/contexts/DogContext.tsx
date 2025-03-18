@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { dogApi } from '@/services/api';
 import { Dog, DogSearchParams, DogSearchResponse, SortDirection } from '@/types';
+import { useAuth } from './AuthContext';
 
 // Simple, focused context type
 interface DogContextType {
@@ -9,6 +10,7 @@ interface DogContextType {
   totalDogs: number;
   favorites: string[];
   isLoading: boolean;
+  isInitialLoading: boolean; // Added to track initial loading state
   error: string | null;
   searchParams: DogSearchParams;
   setSearchParams: (params: Partial<DogSearchParams>) => void;
@@ -40,6 +42,7 @@ const DogContext = createContext<DogContextType | undefined>(undefined);
 // Provider component
 export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // State
+  const {isAuthenticated} = useAuth(); // Ensure the user is authenticated
   const [searchParams, setSearchParamsState] = useState<DogSearchParams>(defaultSearchParams);
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
@@ -53,6 +56,7 @@ export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [totalDogs, setTotalDogs] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSizeState] = useState<number>(25);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
 
   // Extract current sort field and direction
   const [sortField, setSortFieldState] = useState<'breed' | 'name' | 'age'>('breed');
@@ -78,21 +82,23 @@ export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     error: queryError,
     refetch
   } = useQuery<DogSearchResponse>({
+    enabled: isAuthenticated === true, // Only run when explicitly true, not when null
     queryKey: ['dogSearch', searchParams],
     queryFn: async () => {
       try {
         // Search for dog IDs and total count
         return await dogApi.searchDogs(searchParams);
       } catch (error: any) {
+        console.error('Error fetching dogs:', error);
+
         // Check if this is an authentication error
         if (error.response &&
             (error.response.status === 401 ||
              error.response.status === 403 ||
              (error.response.status === 200 && error.response.data && error.response.data.code === 403))) {
-          console.error('Authentication error while fetching dogs:', error);
-          return { resultIds: [], total: 0 };
+          console.error('Authentication error while searching dogs:', error);
         }
-        console.error('Error fetching dogs:', error);
+
         throw error;
       }
     },
@@ -104,6 +110,7 @@ export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
            (error.response.status === 200 && error.response.data && error.response.data.code === 403))) {
         return false;
       }
+      console.error('Error refetching dogs:', error);
       return failureCount < 3;
     }
   });
@@ -150,6 +157,13 @@ export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setTotalDogs(searchResponse.total);
     }
   }, [searchResponse]);
+
+  // Update initial loading state when dogs data is fetched
+  useEffect(() => {
+    if (!isLoading && isInitialLoading) {
+      setIsInitialLoading(false);
+    }
+  }, [isLoading, dogs]);
 
   // Update search parameters
   const setSearchParams = (params: Partial<DogSearchParams>) => {
@@ -237,6 +251,7 @@ export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     totalDogs,
     favorites,
     isLoading,
+    isInitialLoading,
     error: queryError ? String(queryError) : dogsError ? String(dogsError) : null,
     searchParams,
     setSearchParams,

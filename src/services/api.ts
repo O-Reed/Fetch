@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 import {
   Dog,
   DogSearchParams,
@@ -8,34 +8,52 @@ import {
   LocationSearchResponse,
   LoginRequest,
   MatchResponse
-} from '@/types';
+} from "@/types";
 
 // Create an axios instance with the base URL and credentials configuration
 const api = axios.create({
   // Use the Vite proxy instead of direct API URL
-  baseURL: '/api',
+  baseURL: "/api",
   withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json"
   }
 });
 
+// Event for auth errors that components can listen to
+export const AUTH_ERROR_EVENT = "fetch-auth-error";
+
 // Add response interceptor to handle common errors
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     // Check if the error has a response
     if (error.response) {
-      // If it's a 403 error with status 200 (unusual but matches your scenario)
-      if (error.response.status === 200 && error.response.data && error.response.data.code === 403) {
-        console.error('Authentication error: Possible cookie issue', error);
-        // You might add additional handling here
+      // Check for authentication errors (401, 403, or 403 code with 200 status)
+      if (
+        error.response.status === 401 ||
+        error.response.status === 403 ||
+        (error.response.status === 200 &&
+          error.response.data &&
+          error.response.data.code === 403)
+      ) {
+        console.error("Authentication error: Cookie may be expired", error);
+
+        // Dispatch a custom event that the app can listen for
+        const authErrorEvent = new CustomEvent(AUTH_ERROR_EVENT, {
+          detail: {
+            status: error.response.status,
+            message: "Authentication session expired. Please log in again.",
+            timestamp: new Date().toISOString()
+          }
+        });
+        window.dispatchEvent(authErrorEvent);
       }
     } else if (error.request) {
-      console.error('Request error: No response received', error);
+      console.error("Request error: No response received", error);
     } else {
-      console.error('Error setting up request', error.message);
+      console.error("Error setting up request", error.message);
     }
     return Promise.reject(error);
   }
@@ -45,30 +63,33 @@ api.interceptors.response.use(
 export const authApi = {
   login: async (data: LoginRequest): Promise<void> => {
     try {
-      await api.post('/auth/login', data);
+      await api.post("/auth/login", data);
       // Store login state
-      localStorage.setItem('fetch_auth_state', JSON.stringify({
-        timestamp: new Date().toISOString(),
-        version: 1
-      }));
+      localStorage.setItem(
+        "fetch_auth_state",
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          version: 1
+        })
+      );
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       throw error;
     }
   },
-  
+
   logout: async (): Promise<void> => {
     try {
-      await api.post('/auth/logout');
+      await api.post("/auth/logout");
       // Clear all app storage on logout
       const keysToKeep: string[] = []; // Add keys that should persist through logout
       Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('fetch_') && !keysToKeep.includes(key)) {
+        if (key.startsWith("fetch_") && !keysToKeep.includes(key)) {
           localStorage.removeItem(key);
         }
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
       throw error;
     }
   }
@@ -77,22 +98,24 @@ export const authApi = {
 // Dog related API calls
 export const dogApi = {
   getBreeds: async (): Promise<string[]> => {
-    const response = await api.get<string[]>('/dogs/breeds');
+    const response = await api.get<string[]>("/dogs/breeds");
     return response.data;
   },
-  
+
   searchDogs: async (params: DogSearchParams): Promise<DogSearchResponse> => {
-    const response = await api.get<DogSearchResponse>('/dogs/search', { params });
+    const response = await api.get<DogSearchResponse>("/dogs/search", {
+      params
+    });
     return response.data;
   },
-  
+
   getDogs: async (dogIds: string[]): Promise<Dog[]> => {
-    const response = await api.post<Dog[]>('/dogs', dogIds);
+    const response = await api.post<Dog[]>("/dogs", dogIds);
     return response.data;
   },
-  
+
   getMatch: async (dogIds: string[]): Promise<MatchResponse> => {
-    const response = await api.post<MatchResponse>('/dogs/match', dogIds);
+    const response = await api.post<MatchResponse>("/dogs/match", dogIds);
     return response.data;
   }
 };
@@ -100,12 +123,17 @@ export const dogApi = {
 // Location related API calls
 export const locationApi = {
   getLocations: async (zipCodes: string[]): Promise<Location[]> => {
-    const response = await api.post<Location[]>('/locations', zipCodes);
+    const response = await api.post<Location[]>("/locations", zipCodes);
     return response.data;
   },
-  
-  searchLocations: async (params: LocationSearchParams): Promise<LocationSearchResponse> => {
-    const response = await api.post<LocationSearchResponse>('/locations/search', params);
+
+  searchLocations: async (
+    params: LocationSearchParams
+  ): Promise<LocationSearchResponse> => {
+    const response = await api.post<LocationSearchResponse>(
+      "/locations/search",
+      params
+    );
     return response.data;
   }
 };

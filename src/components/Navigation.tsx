@@ -79,9 +79,9 @@ const Navigation = () => {
                   <Heart className="h-4 w-4" />
                   <span>Favorites</span>
                   {favoritesCount > 0 && (
-                    <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white">
+                    <span className="ml-1 flex h-5 min-w-[20px] w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white">
                       {favoritesCount > 99 ? '99+' : favoritesCount}
-                    </span>
+                    </span>                  
                   )}
                 </div>
               </NavLink>

@@ -1,6 +1,6 @@
-import { Outlet, Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts';
-import Navigation from '@/components/Navigation';
+import { Outlet, Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts";
+import Navigation from "@/components/Navigation";
 
 const MainLayout = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -9,13 +9,14 @@ const MainLayout = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
       </div>
     );
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
+  if (!isAuthenticated === null) return null;
+  // Double-check authentication
+  if (isAuthenticated !== true) {
     return <Navigate to="/login" replace />;
   }
 
@@ -30,7 +31,8 @@ const MainLayout = () => {
       <footer className="bg-white border-t py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Fetch Dog Adoption - Find your perfect furry companion
+            &copy; {new Date().getFullYear()} Fetch Dog Adoption - Find your
+            perfect furry companion
           </p>
         </div>
       </footer>

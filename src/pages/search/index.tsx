@@ -21,6 +21,7 @@ const SearchPage = () => {
   const {
     dogs,
     isLoading,
+    isInitialLoading,
     error,
     setSearchParams,
     setPage,
@@ -206,7 +207,7 @@ const SearchPage = () => {
                 <div className="grid grid-cols-3 gap-2">
                   <Button
                     variant={sortOption.field === 'breed' ? "default" : "outline"}
-                    size="sm"
+                    size="md"
                     onClick={() => handleSortChange('breed')}
                     className="flex items-center justify-center gap-1"
                     disabled={isChangingPage}
@@ -219,7 +220,7 @@ const SearchPage = () => {
                   </Button>
                   <Button
                     variant={sortOption.field === 'name' ? "default" : "outline"}
-                    size="sm"
+                    size="md"
                     onClick={() => handleSortChange('name')}
                     className="flex items-center justify-center gap-1"
                     disabled={isChangingPage}
@@ -232,7 +233,7 @@ const SearchPage = () => {
                   </Button>
                   <Button
                     variant={sortOption.field === 'age' ? "default" : "outline"}
-                    size="sm"
+                    size="md"
                     onClick={() => handleSortChange('age')}
                     className="flex items-center justify-center gap-1"
                     disabled={isChangingPage}
@@ -283,7 +284,7 @@ const SearchPage = () => {
 
         {/* Results grid */}
         <div className="lg:col-span-3">
-          {isLoading || isChangingPage ? (
+          {isLoading || isInitialLoading || isChangingPage ? (
             <div className="flex items-center justify-center h-64">
               <Loader2 className="h-8 w-8 animate-spin" />
               <span className="ml-2">
@@ -292,9 +293,16 @@ const SearchPage = () => {
             </div>
           ) : error ? (
             <div className="p-4 border border-red-300 bg-red-50 text-red-700 rounded-md">
-              Error loading dogs: {error}
+              <h3 className="font-semibold mb-2">Error loading dogs</h3>
+              <p>{error}</p>
+              {error.includes('401') && (
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-300 rounded">
+                  <p className="font-medium">Authentication Error</p>
+                  <p className="text-sm mt-1">Your session may have expired. Try refreshing the page or logging out and back in.</p>
+                </div>
+              )}
             </div>
-          ) : dogs.length === 0 ? (
+          ) : dogs.length === 0 && !isLoading && !isInitialLoading && !isChangingPage ? (
             <div className="text-center p-8">
               <h3 className="text-xl font-semibold">No dogs found</h3>
               <p className="text-muted-foreground">Try adjusting your filters</p>
@@ -327,7 +335,7 @@ const SearchPage = () => {
                     value={String(pageSize)}
                     onValueChange={(value) => setPageSize(Number(value))}
                   >
-                    <SelectTrigger className="w-20">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select page size" />
                     </SelectTrigger>
                     <SelectContent>
