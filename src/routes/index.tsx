@@ -8,6 +8,7 @@ import Login from "@/pages/login";
 import SearchPage from "@/pages/search";
 import FavoritesPage from "@/pages/favorites";
 import MatchPage from "@/pages/match";
+import LocationSearchPage from "@/pages/locations";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ProtectedRoute = ({ element }: { element: JSX.Element }) => {
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: "match",
         element: <MatchPage />
+      },
+      {
+        path: "locations",
+        element: <LocationSearchPage />
       }
     ]
   },

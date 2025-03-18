@@ -10,6 +10,9 @@ interface DogContextType {
   totalDogs: number;
   favorites: string[];
   isLoading: boolean;
+  isDetailLoading: boolean;
+  isDetailFetching: boolean; // Added to track background refetching
+  detailStatus: 'loading' | 'error' | 'success'; // Added to track detailed status
   isInitialLoading: boolean; // Added to track initial loading state
   error: string | null;
   searchParams: DogSearchParams;
@@ -118,7 +121,10 @@ export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Query to fetch dog details
   const {
     data: dogs = [],
-    error: dogsError
+    error: dogsError,
+    isLoading: isDetailLoading,
+    isFetching: isDetailFetching,
+    status: detailStatus,
   } = useQuery<Dog[]>({
     queryKey: ['dogDetails', searchResponse?.resultIds],
     enabled: !!searchResponse?.resultIds && searchResponse.resultIds.length > 0,
@@ -160,10 +166,10 @@ export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Update initial loading state when dogs data is fetched
   useEffect(() => {
-    if (!isLoading && isInitialLoading) {
+    if (!isLoading && isInitialLoading && !isDetailLoading && !isDetailFetching) {
       setIsInitialLoading(false);
     }
-  }, [isLoading, dogs]);
+  }, [isLoading, isDetailLoading, isDetailFetching, dogs]);
 
   // Update search parameters
   const setSearchParams = (params: Partial<DogSearchParams>) => {
@@ -251,6 +257,9 @@ export const DogProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     totalDogs,
     favorites,
     isLoading,
+    isDetailLoading,
+    isDetailFetching,
+    detailStatus: detailStatus as 'loading' | 'error' | 'success',
     isInitialLoading,
     error: queryError ? String(queryError) : dogsError ? String(dogsError) : null,
     searchParams,

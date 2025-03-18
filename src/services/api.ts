@@ -123,6 +123,11 @@ export const dogApi = {
 // Location related API calls
 export const locationApi = {
   getLocations: async (zipCodes: string[]): Promise<Location[]> => {
+    // Validate that we don't exceed the maximum of 100 ZIP codes
+    if (zipCodes.length > 100) {
+      throw new Error("Maximum of 100 ZIP codes allowed per request");
+    }
+
     const response = await api.post<Location[]>("/locations", zipCodes);
     return response.data;
   },

@@ -1,10 +1,10 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts';
-import { useFavorite } from '@/contexts/FavoriteContext';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Heart, Search, Menu, X, LogOut, Award } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts";
+import { useFavorite } from "@/contexts/FavoriteContext";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Heart, Search, Menu, X, LogOut, Award, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const Navigation = () => {
   const { isAuthenticated, userName, logout } = useAuth();
@@ -14,23 +14,26 @@ const Navigation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    setFavoritesCount(favorites.length);
-  }, [favorites]);
+  useEffect(
+    () => {
+      setFavoritesCount(favorites.length);
+    },
+    [favorites]
+  );
 
   const handleLogout = async () => {
     try {
       await logout();
       toast({
-        title: 'Logged out',
-        description: 'You have been successfully logged out.',
+        title: "Logged out",
+        description: "You have been successfully logged out."
       });
-      navigate('/');
+      navigate("/");
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to logout. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to logout. Please try again.",
+        variant: "destructive"
       });
     }
   };
@@ -53,12 +56,9 @@ const Navigation = () => {
               <NavLink
                 to="/search"
                 className={({ isActive }) =>
-                  `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    isActive
-                      ? 'border-primary text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`
-                }
+                  `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                    ? "border-primary text-gray-900"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"}`}
               >
                 <div className="flex items-center gap-1">
                   <Search className="h-4 w-4" />
@@ -68,46 +68,57 @@ const Navigation = () => {
               <NavLink
                 to="/favorites"
                 className={({ isActive }) =>
-                  `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    isActive
-                      ? 'border-primary text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`
-                }
+                  `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                    ? "border-primary text-gray-900"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"}`}
               >
                 <div className="flex items-center gap-1">
                   <Heart className="h-4 w-4" />
                   <span>Favorites</span>
-                  {favoritesCount > 0 && (
+                  {favoritesCount > 0 &&
                     <span className="ml-1 flex h-5 min-w-[20px] w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white">
-                      {favoritesCount > 99 ? '99+' : favoritesCount}
-                    </span>                  
-                  )}
+                      {favoritesCount > 99 ? "99+" : favoritesCount}
+                    </span>}
                 </div>
               </NavLink>
-              {matchedDog && (
+              {matchedDog &&
                 <NavLink
                   to="/match"
                   className={({ isActive }) =>
-                    `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                      isActive
-                        ? 'border-primary text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    }`
-                  }
+                    `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                      ? "border-primary text-gray-900"
+                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"}`}
                 >
                   <div className="flex items-center gap-1">
                     <Award className="h-4 w-4" />
                     <span>Your Match</span>
                   </div>
-                </NavLink>
-              )}
+                </NavLink>}
+              <NavLink
+                to="/locations"
+                className={({ isActive }) =>
+                  `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
+                    ? "border-primary text-gray-900"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"}`}
+              >
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>Locations</span>
+                </div>
+              </NavLink>
             </div>
           </div>
           <div className="flex items-center">
             <div className="hidden md:flex md:items-center">
-              <span className="text-sm text-gray-600 mr-4">Hello, {userName}</span>
-              <Button onClick={handleLogout} variant="outline" size="sm" className="flex items-center gap-1">
+              <span className="text-sm text-gray-600 mr-4">
+                Hello, {userName}
+              </span>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+              >
                 <LogOut className="h-4 w-4" />
                 Logout
               </Button>
@@ -118,11 +129,9 @@ const Navigation = () => {
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
               >
                 <span className="sr-only">Open main menu</span>
-                {mobileMenuOpen ? (
-                  <X className="block h-6 w-6" aria-hidden="true" />
-                ) : (
-                  <Menu className="block h-6 w-6" aria-hidden="true" />
-                )}
+                {mobileMenuOpen
+                  ? <X className="block h-6 w-6" aria-hidden="true" />
+                  : <Menu className="block h-6 w-6" aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -130,18 +139,15 @@ const Navigation = () => {
       </div>
 
       {/* Mobile menu */}
-      {mobileMenuOpen && (
+      {mobileMenuOpen &&
         <div className="md:hidden">
           <div className="pt-2 pb-3 space-y-1">
             <NavLink
               to="/search"
               className={({ isActive }) =>
-                `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                  isActive
-                    ? 'bg-primary-50 border-primary text-primary-700'
-                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-                }`
-              }
+                `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive
+                  ? "bg-primary-50 border-primary text-primary-700"
+                  : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"}`}
               onClick={() => setMobileMenuOpen(false)}
             >
               <div className="flex items-center gap-2">
@@ -152,42 +158,47 @@ const Navigation = () => {
             <NavLink
               to="/favorites"
               className={({ isActive }) =>
-                `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                  isActive
-                    ? 'bg-primary-50 border-primary text-primary-700'
-                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-                }`
-              }
+                `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive
+                  ? "bg-primary-50 border-primary text-primary-700"
+                  : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"}`}
               onClick={() => setMobileMenuOpen(false)}
             >
               <div className="flex items-center gap-2">
                 <Heart className="h-5 w-5" />
                 <span>Favorites</span>
-                {favoritesCount > 0 && (
+                {favoritesCount > 0 &&
                   <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white">
-                    {favoritesCount > 99 ? '99+' : favoritesCount}
-                  </span>
-                )}
+                    {favoritesCount > 99 ? "99+" : favoritesCount}
+                  </span>}
               </div>
             </NavLink>
-            {matchedDog && (
+            {matchedDog &&
               <NavLink
                 to="/match"
                 className={({ isActive }) =>
-                  `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                    isActive
-                      ? 'bg-primary-50 border-primary text-primary-700'
-                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-                  }`
-                }
+                  `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive
+                    ? "bg-primary-50 border-primary text-primary-700"
+                    : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"}`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <div className="flex items-center gap-2">
                   <Award className="h-5 w-5" />
                   <span>Your Match</span>
                 </div>
-              </NavLink>
-            )}
+              </NavLink>}
+            <NavLink
+              to="/locations"
+              className={({ isActive }) =>
+                `block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive
+                  ? "bg-primary-50 border-primary text-primary-700"
+                  : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"}`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                <span>Locations</span>
+              </div>
+            </NavLink>
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="flex items-center px-4">
@@ -197,7 +208,9 @@ const Navigation = () => {
                 </div>
               </div>
               <div className="ml-3">
-                <div className="text-base font-medium text-gray-800">{userName}</div>
+                <div className="text-base font-medium text-gray-800">
+                  {userName}
+                </div>
               </div>
             </div>
             <div className="mt-3 space-y-1">
@@ -215,8 +228,7 @@ const Navigation = () => {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </div>}
     </nav>
   );
 };

@@ -333,7 +333,8 @@ const SearchPage = () => {
                   <span>Results per page:</span>
                   <Select
                     value={String(pageSize)}
-                    onValueChange={(value) => setPageSize(Number(value))}
+                    onValueChange={(value) => {
+                      setIsChangingPage(true); setPageSize(Number(value))}}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select page size" />
