@@ -1,10 +1,21 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Dog } from '@/types';
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { Dog } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
-// Define the shape of the context
-interface FavoriteContextType {
+const STORAGE_KEY = "fetch_favorites";
+const STORAGE_VERSION = 1;
+
+interface FavoriteState {
   favorites: Dog[];
   matchedDog: Dog | null;
+}
+
+interface StorageData {
+  state: FavoriteState;
+  version: number;
+}
+
+interface FavoriteContextType extends FavoriteState {
   addFavorite: (dog: Dog) => void;
   removeFavorite: (dogId: string) => void;
   setMatchedDog: (dog: Dog | null) => void;
@@ -12,83 +23,114 @@ interface FavoriteContextType {
   isFavorite: (dogId: string) => boolean;
 }
 
-// Create the context with a default value
+
 const FavoriteContext = createContext<FavoriteContextType | undefined>(undefined);
 
-// Create a provider component
-interface FavoriteProviderProps {
-  children: ReactNode;
-}
+const initialState: FavoriteState = {
+  favorites: [],
+  matchedDog: null
+};
 
-export const FavoriteProvider = ({ children }: FavoriteProviderProps) => {
-  // State for favorites
-  const [favorites, setFavorites] = useState<Dog[]>([]);
-  const [matchedDog, setMatchedDogState] = useState<Dog | null>(null);
+export const FavoriteProvider = ({ children }: { children: ReactNode }) => {
+  const [state, setState] = useState<FavoriteState>(initialState);
+  const { toast } = useToast();
 
-  // Load favorites from localStorage on mount
+
   useEffect(() => {
-    const savedData = localStorage.getItem('favorite-dogs-storage');
-    if (savedData) {
+    const loadSavedState = () => {
       try {
-        const parsedData = JSON.parse(savedData);
-        if (parsedData.state) {
-          if (parsedData.state.favorites) {
-            setFavorites(parsedData.state.favorites);
-          }
-          if (parsedData.state.matchedDog) {
-            setMatchedDogState(parsedData.state.matchedDog);
-          }
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (!savedData) return;
+
+        const parsed = JSON.parse(savedData) as StorageData;
+        
+        if (parsed.version !== STORAGE_VERSION) {
+          throw new Error("Storage version mismatch");
         }
-      } catch (e) {
-        console.error('Failed to parse saved favorites data', e);
+
+        setState(parsed.state);
+      } catch (error) {
+        localStorage.removeItem(STORAGE_KEY);
+        toast({
+          title: "Error Loading Favorites",
+          description: "Your saved favorites could not be loaded",
+          variant: "destructive",
+        });
       }
-    }
-  }, []);
-
-  // Save favorites to localStorage when they change
-  useEffect(() => {
-    const storageObj = {
-      state: { 
-        favorites,
-        matchedDog
-      },
-      version: 0,
     };
-    localStorage.setItem('favorite-dogs-storage', JSON.stringify(storageObj));
-  }, [favorites, matchedDog]);
 
-  // Add favorite function
+    loadSavedState();
+  }, [toast]);
+
+  useEffect(() => {
+    const saveState = () => {
+      try {
+        const storageData: StorageData = {
+          state,
+          version: STORAGE_VERSION
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+      } catch (error) {
+        toast({
+          title: "Error Saving Favorites",
+          description: "Your favorites could not be saved",
+          variant: "destructive",
+        });
+      }
+    };
+
+    saveState();
+  }, [state, toast]);
   const addFavorite = (dog: Dog) => {
-    if (!favorites.some(fav => fav.id === dog.id)) {
-      setFavorites(prev => [...prev, dog]);
-    }
+    setState(prev => {
+      if (prev.favorites.some(fav => fav.id === dog.id)) {
+        return prev;
+      }
+      
+      if (prev.favorites.length >= 100) {
+        toast({
+          title: "Favorites Limit Reached",
+          description: "You can only favorite up to 100 dogs",
+          variant: "destructive",
+        });
+        return prev;
+      }
+
+      return {
+        ...prev,
+        favorites: [...prev.favorites, dog]
+      };
+    });
   };
 
-  // Remove favorite function
+
   const removeFavorite = (dogId: string) => {
-    setFavorites(prev => prev.filter(fav => fav.id !== dogId));
+    setState(prev => ({
+      ...prev,
+      favorites: prev.favorites.filter(fav => fav.id !== dogId),
+      matchedDog: prev.matchedDog?.id === dogId ? null : prev.matchedDog
+    }));
   };
 
-  // Set matched dog function
+
   const setMatchedDog = (dog: Dog | null) => {
-    setMatchedDogState(dog);
+    setState(prev => ({
+      ...prev,
+      matchedDog: dog
+    }));
   };
 
-  // Clear favorites function
+
   const clearFavorites = () => {
-    setFavorites([]);
-    setMatchedDogState(null);
+    setState(initialState);
   };
 
-  // Check if dog is favorite
-  const isFavorite = (dogId: string) => {
-    return favorites.some(fav => fav.id === dogId);
+  const isFavorite = (dogId: string): boolean => {
+    return state.favorites.some(fav => fav.id === dogId);
   };
 
-  // Create the context value object
-  const contextValue: FavoriteContextType = {
-    favorites,
-    matchedDog,
+  const value: FavoriteContextType = {
+    ...state,
     addFavorite,
     removeFavorite,
     setMatchedDog,
@@ -97,17 +139,19 @@ export const FavoriteProvider = ({ children }: FavoriteProviderProps) => {
   };
 
   return (
-    <FavoriteContext.Provider value={contextValue}>
+    <FavoriteContext.Provider value={value}>
       {children}
     </FavoriteContext.Provider>
   );
 };
 
-// Custom hook to use the favorite context
+
 export const useFavorite = () => {
   const context = useContext(FavoriteContext);
+  
   if (context === undefined) {
-    throw new Error('useFavorite must be used within a FavoriteProvider');
+    throw new Error("useFavorite must be used within a FavoriteProvider");
   }
+  
   return context;
 };

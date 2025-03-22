@@ -23,8 +23,8 @@ module.exports = {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				DEFAULT: '#f43f5e',
+  				foreground: '#ffffff'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
@@ -84,7 +84,22 @@ module.exports = {
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out'
-  		}
+  		},
+      minHeight: {
+        'screen-without-nav': 'calc(100vh - 4rem)',
+      },
+      gradientColorStops: {
+        'primary-gradient': {
+          start: 'var(--primary-light)',
+          end: 'var(--primary-dark)',
+        },
+      },
+      transitionProperty: {
+        'transform': 'transform',
+      },
+      transitionDuration: {
+        '300': '300ms',
+      },
   	}
   },
   plugins: [require("tailwindcss-animate")],

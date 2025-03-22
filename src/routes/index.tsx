@@ -3,26 +3,19 @@ import {
   RouterProvider,
   Navigate
 } from "react-router-dom";
+
 import MainLayout from "@/layouts/MainLayout";
 import Login from "@/pages/login";
 import SearchPage from "@/pages/search";
 import FavoritesPage from "@/pages/favorites";
 import MatchPage from "@/pages/match";
-import LocationSearchPage from "@/pages/locations";
-import { useAuth } from "@/contexts/AuthContext";
+// import LocationSearchPage from "@/pages/locations";
+import { getUser } from "@/apis/auth/useLogin";
 
 const ProtectedRoute = ({ element }: { element: JSX.Element }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const user = getUser();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (isAuthenticated === null) {
-    return null;
-  }
-  // If isAuthenticated is null or false, redirect to login
-  if (isAuthenticated !== true) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
@@ -53,11 +46,12 @@ const router = createBrowserRouter([
       {
         path: "match",
         element: <MatchPage />
-      },
-      {
-        path: "locations",
-        element: <LocationSearchPage />
       }
+
+      // {
+      //   path: "locations",
+      //   element: <LocationSearchPage />
+      // }
     ]
   },
   {

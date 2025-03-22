@@ -1,18 +1,25 @@
+import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts";
+import { Heart, Search, Menu, X, LogOut, Award, MapPin } from "lucide-react";
+
+import { useToast } from "@/hooks/use-toast";
+import { useLogout } from "@/apis/auth/useLogout";
+import { getUser } from "@/apis/auth/useLogin";
+
 import { useFavorite } from "@/contexts/FavoriteContext";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Heart, Search, Menu, X, LogOut, Award, MapPin } from "lucide-react";
-import { useEffect, useState } from "react";
+
 
 const Navigation = () => {
-  const { isAuthenticated, userName, logout } = useAuth();
+  const { logout } = useLogout();
+  const { name: username } = getUser();
   const { favorites, matchedDog } = useFavorite();
-  const [favoritesCount, setFavoritesCount] = useState(favorites.length);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const [favoritesCount, setFavoritesCount] = useState(favorites.length);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
 
   useEffect(
     () => {
@@ -42,8 +49,7 @@ const Navigation = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  if (!isAuthenticated || !userName) return null;
-
+  
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,7 +100,7 @@ const Navigation = () => {
                     <span>Your Match</span>
                   </div>
                 </NavLink>}
-              <NavLink
+              {/* <NavLink
                 to="/locations"
                 className={({ isActive }) =>
                   `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${isActive
@@ -105,13 +111,13 @@ const Navigation = () => {
                   <MapPin className="h-4 w-4" />
                   <span>Locations</span>
                 </div>
-              </NavLink>
+              </NavLink> */}
             </div>
           </div>
           <div className="flex items-center">
             <div className="hidden md:flex md:items-center">
               <span className="text-sm text-gray-600 mr-4">
-                Hello, {userName}
+                Hello, {username}
               </span>
               <Button
                 onClick={handleLogout}
@@ -204,12 +210,12 @@ const Navigation = () => {
             <div className="flex items-center px-4">
               <div className="flex-shrink-0">
                 <div className="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
-                  {userName.charAt(0).toUpperCase()}
+                  {username?.charAt(0).toUpperCase()}
                 </div>
               </div>
               <div className="ml-3">
                 <div className="text-base font-medium text-gray-800">
-                  {userName}
+                  {username}
                 </div>
               </div>
             </div>
