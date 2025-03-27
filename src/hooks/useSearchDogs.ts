@@ -3,7 +3,7 @@ import { Dog, DogSearchParams, SortOption, SortDirection } from '@/types';
 import { useBreeds } from '@/apis/dogs/useBreeds';
 import { useSearchDogs } from '@/apis/dogs/useSearchDogs';
 
-export const useDogsSearch = (initialPageSize = 25) => {
+export const useDogsSearch = (initialPageSize = 24) => {
   const [breeds, setBreeds] = useState<string[]>([]);
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [selectedBreed, setSelectedBreed] = useState<string[]>([]);

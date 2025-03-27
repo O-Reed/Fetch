@@ -1,7 +1,9 @@
 import { Outlet } from "react-router-dom";
+
 import Navigation from "@/components/Navigation";
 
 const MainLayout = () => {
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />

@@ -21,6 +21,7 @@ const Login = () => {
   const { login, isPending } = useLogin();
   const { toast } = useToast();
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -33,7 +34,7 @@ const Login = () => {
       return;
     }
 
-    // Basic email validation
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast({
@@ -50,6 +51,7 @@ const Login = () => {
         title: "Success!",
         description: `Welcome, ${name}! You've successfully logged in.`
       });
+
     } catch (error) {
       toast({
         title: "Authentication Failed",
